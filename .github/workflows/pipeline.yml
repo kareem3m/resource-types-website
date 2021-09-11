@@ -19,17 +19,17 @@ jobs:
     - name: Update git submodules
       run: git submodule update --init --recursive
         
-    - name: Back-End Tests
-      run: |
-        rm -r $GOROOT_1_14_X64
-        rm -r $GOROOT_1_15_X64
-        rm -r $GOROOT_1_17_X64
-        export GOBIN=$GOROOT_1_16_X64/bin
-        export PATH="$GOBIN:$PATH"
-        cd warehouse
-        go mod tidy
-        go install github.com/onsi/ginkgo/ginkgo@latest
-        ginkgo -r -keepGoing .
+#     - name: Back-End Tests
+#       run: |
+#         rm -r $GOROOT_1_14_X64
+#         rm -r $GOROOT_1_15_X64
+#         rm -r $GOROOT_1_17_X64
+#         export GOBIN=$GOROOT_1_16_X64/bin
+#         export PATH="$GOBIN:$PATH"
+#         cd warehouse
+#         go mod tidy
+#         go install github.com/onsi/ginkgo/ginkgo@latest
+#         ginkgo -r -keepGoing .
       
     - name: Front-End Tests
       run: |
