@@ -1,0 +1,53 @@
+name: Test-Build-Deploy
+
+on:
+# Triggers the workflow on push or pull request events but only for the master branch
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+env:
+  GH_TOKEN: ${{secrets.GH_TOKEN}}
+  
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    
+    - name: Update git submodules
+      run: git submodule update --init --recursive
+        
+    - name: Back-End Tests
+      run: |
+        rm -r $GOROOT_1_14_X64
+        rm -r $GOROOT_1_15_X64
+        rm -r $GOROOT_1_17_X64
+        export GOBIN=$GOROOT_1_16_X64/bin
+        export PATH="$GOBIN:$PATH"
+        cd warehouse
+        go mod tidy
+        go install github.com/onsi/ginkgo/ginkgo@latest
+        ginkgo -r -keepGoing .
+      
+    - name: Front-End Tests
+      run: |
+        cd warehouse 
+        yarn install 
+        yarn test
+    
+    
+  build-deploy:
+    runs-on: ubuntu-latest
+    needs: tests
+    steps:
+      - uses: actions/checkout@v2
+      - uses: akhileshns/heroku-deploy@v3.12.12
+        with:
+          heroku_api_key: ${{secrets.HEROKU_API_KEY}}
+          heroku_app_name: ${{secrets.HEROKU_APP_NAME}}
+          heroku_email: ${{secrets.HEROKU_EMAIL}}
+          usedocker: true
+        env:
+          HD_GH_TOKEN: ${{secrets.GH_TOKEN}}
